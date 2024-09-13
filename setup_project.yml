@@ -1,0 +1,37 @@
+---
+- name: Установка проектов под {{ company_name }}.ismacloud.ru
+  hosts: 192.168.0.69
+  become: true
+  vars:
+    company_name: "{{ company_name }}"
+    branch_name: "demo_prod"
+  collections:
+    - community.docker.docker_compose_v2_pull
+
+  tasks:
+    - name: Создание папки для frontend и backend
+      file:
+        path: "/srv/site/{{ company_name }}.ismacloud.ru/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "{{ company_name }}frontend"
+        # - "{{ company_name }}backend"
+
+    - name: Клонирование frontend
+      git:
+        repo: 'git@gitlab.com:aiowl/frontend-corpsite.git'
+        dest: "/srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}frontend"
+        version: "{{ branch_name }}"
+        update: yes
+
+    # - name: Клонирование backend
+    #   git:
+    #     repo: 'git@gitlab.com:aiowl/backend-corpsite.git'
+    #     dest: "/srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}backend"
+    #     version: "{{ branch_name }}" 
+    #     update: yes
+    - name: Сгенерировать пароли здесь? или сразу собрать docker image где будет вложены .env
+    - name: Сгенерировать .env
+    - name: Сгенерировать docker compose
+    - name: Запуск Docker контейнера
