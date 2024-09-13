@@ -16,9 +16,9 @@
         msg: "Конфигурационный файл для {{ company_name }}.ismacloud.ru уже существует."
       when: nginx_conf.stat.exists
 
-    - name: Создаю NGINX конфиг
+    - name: Создаю NGINX конфиг без SSL
       template:
-        src: ./template/nginx_site.j2
+        src: ./template/nginx_site_nossl.j2
         dest: "/etc/nginx/sites-available/{{ company_name }}.ismacloud.ru"
         mode: '0644'
 
@@ -43,11 +43,42 @@
         name: nginx
         state: reloaded
 
-    # Задача для выпуска сертификата
     - name: Выпуск SSL-сертификата для домена {{ company_name }}.ismacloud.ru и {{ company_name }}api.ismacloud.ru
-      command: "certbot --nginx -d {{ company_name }}.ismacloud.ru -d {{ company_name }}api.ismacloud.ru --non-interactive --agree-tos --email mizhakov21@mail.ru"
+      command: "certbot certonly --nginx -d {{ company_name }}.ismacloud.ru -d {{ company_name }}api.ismacloud.ru -d {{ company_name }}tg.ismacloud.ru --non-interactive --agree-tos --email mizhakov21@mail.ru"
       notify: restart nginx
 
+    - name: Удаление сертификата без SSL конфигурации NGINX
+      file:
+        path: "/etc/nginx/sites-available/{{ company_name }}.ismacloud.ru"
+        state: absent
+
+    - name: Удаление символической ссылки на старую конфигурацию NGINX
+      file:
+        path: "/etc/nginx/sites-enabled/{{ company_name }}.ismacloud.ru.conf"
+        state: absent
+
+    - name: Создание новой конфигурации с SSL
+      template:
+        src: ./template/nginx_site_ssl.j2
+        dest: "/etc/nginx/sites-available/{{ company_name }}.ismacloud.ru"
+        mode: '0644'
+
+    - name: Создание символической ссылки для с SSL
+      file:
+        src: "/etc/nginx/sites-available/{{ company_name }}.ismacloud.ru"
+        dest: "/etc/nginx/sites-enabled/{{ company_name }}.ismacloud.ru.conf"
+        state: link
+
+    - name: Проверяю NGINX конфиг на ошибки
+      command: nginx -t
+      register: nginx_test
+      ignore_errors: true
+
+    - name: Вывод ошибки если проверка не прошла
+      fail:
+        msg: "NGINX configuration test failed"
+      when: nginx_test.rc != 0
+      
   handlers:
     - name: restart nginx
       service:
