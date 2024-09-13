@@ -1,0 +1,55 @@
+---
+- name: Установка NGINX для {{ company_name }}
+  hosts: localhost
+  become: true
+  vars:
+    company_name: "{{ company_name }}"
+
+  tasks:
+    - name: Проверка на существование одноименного файла
+      stat:
+        path: "/etc/nginx/sites-available/{{ company_name }}.ismacloud.ru"
+      register: nginx_conf
+
+    - name: Остановить, если файл уже существует
+      fail:
+        msg: "Конфигурационный файл для {{ company_name }}.ismacloud.ru уже существует."
+      when: nginx_conf.stat.exists
+
+    - name: Создаю NGINX конфиг
+      template:
+        src: ./template/nginx_site.j2
+        dest: "/etc/nginx/sites-available/{{ company_name }}.ismacloud.ru"
+        mode: '0644'
+
+    - name: Создаю ссылку для NGINX
+      file:
+        src: "/etc/nginx/sites-available/{{ company_name }}.ismacloud.ru"
+        dest: "/etc/nginx/sites-enabled/{{ company_name }}.ismacloud.ru.conf"
+        state: link
+
+    - name: Проверяю NGINX конфиг на ошибки
+      command: nginx -t
+      register: nginx_test
+      ignore_errors: true
+
+    - name: Вывод ошибки если проверка не прошла
+      fail:
+        msg: "NGINX configuration test failed"
+      when: nginx_test.rc != 0
+
+    - name: Перезагрузка NGINX
+      service:
+        name: nginx
+        state: reloaded
+
+    # Задача для выпуска сертификата
+    - name: Выпуск SSL-сертификата для домена {{ company_name }}.ismacloud.ru и {{ company_name }}api.ismacloud.ru
+      command: "certbot --nginx -d {{ company_name }}.ismacloud.ru -d {{ company_name }}api.ismacloud.ru --non-interactive --agree-tos --email mizhakov21@mail.ru"
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

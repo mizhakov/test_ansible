@@ -1,0 +1,48 @@
+---
+- name: Установка NGINX для {{ company_name }}
+  hosts: 192.168.0.69
+  become: true
+  vars:
+    company_name: "{{ company_name }}"
+
+  tasks:
+
+    - name: Проверка на существование одноименного файла
+      stat:
+        path: "/srv/server/nginx/nginx/conf.d/{{ company_name }}.ismacloud.ru.conf"
+      register: nginx_conf
+
+    - name: Остановить, если файл уже существует
+      fail:
+        msg: "Конфигурационный файл для {{ company_name }}.ismacloud.ru уже существует."
+      when: nginx_conf.stat.exists
+
+    - name: Создаю NGINX конфиг
+      copy:
+        dest: "/srv/server/nginx/nginx/conf.d/{{ company_name }}.ismacloud.ru.conf"
+        content: |
+          server {
+            listen 80;
+            server_name {{ company_name }}.ismacloud.ru;
+
+            location / {
+                proxy_pass http://{{ company_name }}-react:8182;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+          }
+          server {
+              listen 80;
+              server_name {{ company_name }}api.ismacloud.ru;
+
+              location / {
+                  proxy_pass http://{{ company_name }}-backedbase:8181;  # Проксирование на контейнер strapi
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto $scheme;
+              }
+          }
+
