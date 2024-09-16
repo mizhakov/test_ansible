@@ -1,0 +1,15 @@
+services:
+  {{ company_name }}-react:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - nginx_network
+      - {{ company_name }}-network
+
+networks:
+  {{ company_name }}-network:
+    external: true
+  nginx_network:
+    external: true

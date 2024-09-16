@@ -44,7 +44,8 @@
         state: reloaded
 
     - name: Выпуск SSL-сертификата для домена {{ company_name }}.ismacloud.ru и {{ company_name }}api.ismacloud.ru
-      command: "certbot certonly --nginx -d {{ company_name }}.ismacloud.ru -d {{ company_name }}api.ismacloud.ru -d {{ company_name }}tg.ismacloud.ru --non-interactive --agree-tos --email mizhakov21@mail.ru"
+      # command: "certbot certonly --nginx -d {{ company_name }}.ismacloud.ru -d {{ company_name }}api.ismacloud.ru -d {{ company_name }}tg.ismacloud.ru --non-interactive --agree-tos --email mizhakov21@mail.ru"
+      command: "certbot certonly --nginx --staging -d {{ company_name }}.ismacloud.ru -d {{ company_name }}api.ismacloud.ru -d {{ company_name }}tg.ismacloud.ru --non-interactive --agree-tos --email mizhakov21@mail.ru"
       notify: restart nginx
 
     - name: Удаление сертификата без SSL конфигурации NGINX

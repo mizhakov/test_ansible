@@ -1,0 +1,28 @@
+---
+- name: Генерация front файла .env для {{ company_name }}
+  hosts: 192.168.0.69
+  become: true
+  vars:
+    company_name: "{{ company_name }}"
+  tasks:
+    - name: Генерация front файла .env для {{ company_name }}
+      template:
+        src: template/env_front.j2
+        dest: "/srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}frontend/.env"
+        mode: '0644'
+    # - name: Запуск Docker фронта
+    #   community.docker.docker_compose_v2:
+    #     project_src: /srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}frontend
+    #     build: true
+    #     pull: true
+    #     remove_orphans: true
+    #     state: present
+    #     restarted: true
+    # - name: Запуск Docker бэка
+    #   community.docker.docker_compose_v2:
+    #     project_src: /srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}backend
+    #     build: true
+    #     pull: true
+    #     remove_orphans: true
+    #     state: present
+    #     restarted: true

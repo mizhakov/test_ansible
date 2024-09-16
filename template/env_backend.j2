@@ -1,0 +1,45 @@
+# Production
+DevMod = False
+
+## Bd 
+POSTGRES_SERVER="{{ company_name }}backend-{{ company_name }}-postgres-1:5432"
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="{{ db_password }}"
+POSTGRES_DB="base_db"
+# "base_url = value" так нужно заполнять, "base_url=value" база не запустится
+base_url = postgresql://postgres:{{ db_password }}@{{ company_name }}backend-{{ company_name }}-postgres-1:5432/base_db
+REDIS="redis"
+
+# Это должен быть url парсера с маркетов 
+DATA_URL="85.234.7.142:8000" 
+# Это должен быть url самого бэка чтоб можно было из бота управлять вебсокетами
+API_URL="85.234.7.142:8181"
+
+## Это для создания JWT токенов и паролей
+SECRET_KEY="{{ secret_key }}"
+ALGORITHM="HS256"
+
+# Для Wb
+WB_API = "{{ wb_api_token }}"
+
+## Tg bots
+WEBHOOK_HOST = "https://{{ company_name }}tg.ismacloud.ru"
+TG_BOT_TOKEN = "{{ tg_bot_token }}"
+
+# Для OZON
+CLIENT_ID_OZON = 213213
+OZON_API = "{{ ozon_api_token }}"
+
+# TestBot
+API_ID=20179693
+API_HASH="{{ api_hash }}"
+APP_TITLE="HelloTestBotHunter"
+SHORT_NAME="BotHunter"
+WEBHOOK_SECRET="{{ webhook_secret }}"
+WEBAPP_HOST='0.0.0.0'
+WEBAPP_PORT="5001"
+
+## minio
+MINIO_URL="85.234.7.142:9000"
+MINIO_ACCESS_KEY="{{ minio_access_key }}"
+MINIO_SECRET_KEY="{{ minio_secret_key }}"

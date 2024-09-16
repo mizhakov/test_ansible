@@ -16,7 +16,7 @@
         mode: '0755'
       loop:
         - "{{ company_name }}frontend"
-        # - "{{ company_name }}backend"
+        - "{{ company_name }}backend"
 
     - name: Клонирование frontend
       git:
@@ -25,13 +25,11 @@
         version: "{{ branch_name }}"
         update: yes
 
-    # - name: Клонирование backend
-    #   git:
-    #     repo: 'git@gitlab.com:aiowl/backend-corpsite.git'
-    #     dest: "/srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}backend"
-    #     version: "{{ branch_name }}" 
-    #     update: yes
-    - name: Сгенерировать пароли здесь? или сразу собрать docker image где будет вложены .env
-    - name: Сгенерировать .env
-    - name: Сгенерировать docker compose
-    - name: Запуск Docker контейнера
+    - name: Клонирование backend
+      git:
+        repo: 'git@gitlab.com:aiowl/backend-corpsite.git'
+        dest: "/srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}backend"
+        version: "{{ branch_name }}" 
+        update: yes
+    
+

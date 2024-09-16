@@ -1,0 +1,36 @@
+---
+- name: Генерация docker-compose.yml для {{ company_name }}
+  hosts: 192.168.0.69
+  # hosts: localhost
+  become: true
+  vars:
+    company_name: "{{ company_name }}"
+
+  tasks:
+    - name: Генерация docker-compose.yml для бэка
+      template:
+        src: template/docker_compose_backend.j2
+        dest: "/srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}backend/docker-compose.yml"
+        # dest: "/srv/ansible/docker-compose.yml"
+        mode: '0644'
+
+    - name: Генерация docker-compose.yml для фронта
+      template:
+        src: template/docker_compose_front.j2
+        dest: "/srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}frontend/docker-compose.yml"
+        # dest: "/srv/ansible/docker-compose.yml"
+        mode: '0644'
+    - name: Запуск Docker бэка
+      community.docker.docker_compose_v2:
+        project_src: /srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}backend
+        build: always
+        pull: missing
+        remove_orphans: true
+        state: present
+    - name: Запуск Docker фронта
+      community.docker.docker_compose_v2:
+        project_src: /srv/site/{{ company_name }}.ismacloud.ru/{{ company_name }}frontend
+        build: always
+        pull: missing
+        remove_orphans: true
+        state: present
